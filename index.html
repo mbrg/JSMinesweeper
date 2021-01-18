@@ -10,10 +10,10 @@
 <body style="position: absolute; left:0px; right:0px; top:0px; bottom:0px; zoom: 1;" onresize="browserResized()">
 
     <!-- Title at the top -->
-    <h1 id="title">Minesweeper solver</h1>
+    <h1 id="title" hidden="true">Minesweeper solver</h1>
 
     <!-- control panel on the left -->
-    <nav id="controls">
+    <nav id="controls" hidden="true">
 
         <div class="checkboxes">
             <label><input type="checkbox" class="checkbox" id="analysismode" onclick="setAnalysis()" /> <span>Analysis mode</span></label>
@@ -120,12 +120,12 @@
                 <canvas id="myCanvas" width="500" height="500" oncontextmenu="return false" style="position: absolute; top: 0px; left: 0px;"></canvas>
                 <canvas id="myHints" width="500" height="500" oncontextmenu="return false" style="position: absolute; top: 0px; left: 0px; pointer-events: none;"></canvas>
             </div>
-            <span id="tooltip" class="tooltiptext" style="pointer-events: none;">Tooltip text</span>
+            <span id="tooltip" class="tooltiptext" style="visibility:hidden;pointer-events: none;">Tooltip text</span>
         </section>
     </div>
 
     <!-- message line at the bottom -->
-    <div class="raised" style="position: absolute; bottom: 0px; left: 0px; right: 0px; margin: 10px;">
+    <div class="raised" style="position: absolute; bottom: 0px; left: 0px; right: 0px; margin: 10px;" hidden="true">
         <label id="messageLine" style="font-size:20px; padding:5px;">A message line</label>
     </div>
 
