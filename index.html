@@ -7,7 +7,7 @@
     <link rel="icon" type="image/png" href="resources/images/flagged.png" />
     <title>Minesweeper solver</title>
 </head>
-<body style="position: absolute; left:0px; right:0px; top:0px; bottom:0px; zoom: 1;" onresize="browserResized()">
+<body onresize="browserResized()">
 
     <!-- Title at the top -->
     <h1 id="title" hidden="true">Minesweeper solver</h1>
@@ -104,7 +104,7 @@
     </nav>
 
     <!-- where the board goes -->
-    <div style="position: absolute; left: 200px; right: 10px; top: 75px; bottom: 60px;">
+    <div>
         <section class="tooltip" id="canvas" style="position: absolute; left: 10px; top: 0px; bottom: 0px; right: 0px;">
             <div id="display">
                 <canvas class="led" id="myMinesLeft" width="96" height="40" oncontextmenu="return false"></canvas>
