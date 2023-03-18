@@ -1,0 +1,255 @@
+<div>
+<link rel="stylesheet" href="Minesweeper/client/main.css">
+
+<!-- Title at the top -->
+<h1 id="title" hidden="true">Minesweeper solver</h1>
+
+<!-- control panel on the left -->
+<nav id="controls" hidden="true">
+
+    <div class="checkboxes">
+        <label><input type="checkbox" class="checkbox" id="analysismode" onclick="setAnalysis()" /> <span>Analysis mode</span></label>
+    </div>
+
+    <div id="play0" style="margin-top: 15px;">
+        <div class="checkboxes">
+            <label><input type="checkbox" class="checkbox" id="useSeed" /> <span>Use seed</span></label>
+        </div>
+        <div>
+            <input id="seed" type="text" style="width: 150px" />
+        </div>
+
+        <div class="checkboxes">
+            <label><input type="checkbox" class="checkbox" id="gameTypeZero" checked /> <span>Opening on start</span></label>
+        </div>
+
+        <div class="checkboxes">
+            <label><input type="checkbox" class="checkbox" id="fastPlay"/> <span>Fast mode</span></label>
+        </div>
+    </div>
+
+    <div class="radioButtons" style="margin-top: 15px;">
+        <label><input id="beginner" type="radio" class="radioButton" name="boardSize" value="0"><span>Beginner</span></label>
+        <label><input id="intermediate" type="radio" class="radioButton" name="boardSize" value="1"><span>Intermediate</span></label>
+        <label><input id="expert" type="radio" class="radioButton" name="boardSize" value="2" checked><span>Expert</span></label>
+        <label style="margin-bottom: 0.5em;"><input id="custom" type="radio" class="radioButton" name="boardSize" value="3"><span>Custom</span></label>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <div class="block">
+            <label>Width:</label>
+            <input id="width" onkeypress="makeCustom()" type="text" />
+        </div>
+        <div class="block">
+            <label>Height:</label>
+            <input id="height" onkeypress="makeCustom()" type="text" />
+        </div>
+        <div class="block">
+            <label>Mines:</label>
+            <input id="mines" onkeypress="makeCustom()" type="text" />
+        </div>
+    </div>
+
+
+    <div style="margin-top: 1em; display: none;" class="radioButtons" id="analysis0">
+        <label><input id="buildHidden" type="radio" class="radioButton" name="buildType" value="hidden"><span>Build all hidden</span></label>
+        <label><input id="buildZero" type="radio" class="radioButton" name="buildType" value="zero" checked><span>Build all zero</span></label>
+        <button style="margin-top: 1em;" id="localStorageButton" onclick="openLocalStorage()">Local Storage</button>
+    </div>
+
+    <button style="margin-top: 1em;" id="NewGame" onclick="apply()">New game</button>
+
+    <div style="margin-top: 10px;">
+        <label>Style:</label>
+        <select id="playstyle">
+            <option value="flag">Flagging</option>
+            <option value="noflag">No flagging</option>
+            <option value="eff">Efficiency</option>
+        </select>
+    </div>
+
+    <div style="margin-top: 10px;">
+        <label>Tile size:</label>
+        <select id="tilesize">
+            <option value="12">12 pixels</option>
+            <option value="16">16 pixels</option>
+            <option value="20">20 pixels</option>
+            <option selected value="24">24 pixels</option>
+            <option value="28">28 pixels</option>
+            <option value="32">32 pixels</option>
+        </select>
+    </div>
+
+    <div style="margin-top: 1em;" class="checkboxes" id="play1">
+        <label><input type="checkbox" class="checkbox" id="showhints" checked /> <span>Show hints</span></label>
+        <label><input type="checkbox" class="checkbox" id="autoplay" /> <span>Auto play</span></label>
+        <label><input type="checkbox" class="checkbox" id="acceptguesses" /> <span>Accept guesses</span></label>
+
+    </div>
+
+    <div style="margin-top: 1em; display: none;" class="checkboxes" id="analysis1">
+        <label><input type="checkbox" class="checkbox" id="lockMineCount" /> <span>Lock mine count</span></label>
+    </div>
+
+    <button style="margin-top: 1em;" id="AnalysisButton" onclick="doAnalysis()">Analyse</button>
+
+</nav>
+
+<!-- where the board goes -->
+<div>
+    <section class="tooltip" id="canvas" style="position: absolute; left: 10px; top: 0px; bottom: 0px; right: 0px;">
+        <div id="display">
+            <canvas class="led" id="myMinesLeft" width="96" height="40" oncontextmenu="return false"></canvas>
+        </div>
+        <div  id="board" style="overflow: auto; position: absolute; top:60px; left:0px;">
+            <canvas id="myCanvas" width="500" height="500" oncontextmenu="return false" style="position: absolute; top: 0px; left: 0px;"></canvas>
+            <canvas id="myHints" width="500" height="500" oncontextmenu="return false" style="position: absolute; top: 0px; left: 0px; pointer-events: none;"></canvas>
+        </div>
+        <span id="tooltip" class="tooltiptext" style="visibility:hidden;pointer-events: none;">Tooltip text</span>
+    </section>
+</div>
+
+<!-- message line at the bottom -->
+<div class="raised" style="position: absolute; bottom: 0px; left: 0px; right: 0px; margin: 10px;" hidden="true">
+    <label id="messageLine" style="font-size:20px; padding:5px;">A message line</label>
+</div>
+
+<!-- Local storage popup -->
+<div id="localStorage" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content" style="position: relative; width: 600px; height: 600px">
+        <p>From here you can store and fetch positions from the browsers local storage. This storage persists between sessions.</p>
+        <select style="width: 100%" id="localStorageSelection" size="24" onchange="localStorageKey.value = localStorageSelection.value">
+        </select>
+        <input id="localStorageKey" type="text" style="width: 98%" />
+        <button style="position: absolute; bottom: 50px; left: 5px" id="localStorageDelete" onclick="deleteLocalStorage()">Delete</button>
+        <button style="position: absolute; bottom: 50px; left: 225px" id="localStorageSave" onclick="saveLocalStorage()">Store</button>
+        <button style="position: absolute; bottom: 50px; Right: 5px" id="localStorageLoad" onclick="loadLocalStorage()">Fetch</button>
+
+        <button style="position: absolute; bottom: 5px; right: 5px" id="localStorageCancel" onclick="closeLocalStorage()">Cancel</button>
+    </div>
+</div>
+
+<script src="Minesweeper/client/Board.js" type="text/javascript"></script>
+<script src="Minesweeper/client/Tile.js" type="text/javascript"></script>
+
+<script src="Minesweeper/client/solver_main.js" type="text/javascript"></script>
+<script src="Minesweeper/client/solver_probability_engine.js" type="text/javascript"></script>
+<script src="Minesweeper/client/Brute_force.js" type="text/javascript"></script>
+<script src="Minesweeper/client/BruteForceAnalysis.js" type="text/javascript"></script>
+<script src="Minesweeper/client/MinesweeperGame.js" type="text/javascript"></script>
+<script src="Minesweeper/client/SolutionCounter.js" type="text/javascript"></script>
+<script src="Minesweeper/client/EfficiencyHelper.js" type="text/javascript"></script>
+<script src="Minesweeper/client/main.js" type="text/javascript"></script>
+<script src="Minesweeper/Utility/PrimeSieve.js" type="text/javascript"></script>
+<script src="Minesweeper/Utility/Binomial.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    function apply() {
+
+        if (document.getElementById("beginner").checked) {
+            doNewGame(9, 9, 10);
+            return;
+        }
+
+        if (document.getElementById("intermediate").checked) {
+            doNewGame(16, 16, 40);
+            return;
+        }
+
+        if (document.getElementById("expert").checked) {
+            doNewGame(30, 16, 99);
+            return;
+        }
+
+        const MAX_WIDTH = 200;
+        const MAX_HEIGHT = 200;
+
+        var widthX = document.getElementById("width").value;
+        var heightX = document.getElementById("height").value;
+        var minesX = document.getElementById("mines").value;
+
+        if (isNaN(widthX)) {
+            return;
+        }
+        if (isNaN(heightX)) {
+            return;
+        }
+        if (isNaN(minesX)) {
+            return;
+        }
+
+        var width = Number(widthX);
+        var height = Number(heightX);
+        var mines = Number(minesX);
+
+        if (width < 1) {
+            document.getElementById("width").value = 1
+            width = 1;
+        }
+
+        if (width > MAX_WIDTH) {
+            document.getElementById("width").value = MAX_WIDTH;
+            width = MAX_WIDTH;
+        }
+
+        if (height < 1) {
+            document.getElementById("height").value = 1
+            height = 1;
+        }
+
+        if (height > MAX_HEIGHT) {
+            document.getElementById("height").value = MAX_HEIGHT;
+            height = MAX_HEIGHT;
+        }
+
+        if (mines < 1) {
+            document.getElementById("mines").value = 1;
+            mines = 1;
+        }
+
+        if (mines > width * height - 1) {
+            document.getElementById("mines").value = width * height - 1;
+            mines = width * height - 1;
+        }
+
+        doNewGame(width, height, mines);
+
+    }
+
+    function doNewGame(width, height, mines) {
+
+        if (document.getElementById("useSeed").checked) {
+            newGame(width, height, mines, document.getElementById("seed").value);
+        } else {
+            newGame(width, height, mines, 0);
+        }
+
+    }
+
+    function setAnalysis() {
+
+        if (document.getElementById("analysismode").checked) {
+            document.getElementById("play0").style.display = "none";
+            document.getElementById("play1").style.display = "none";
+            document.getElementById("analysis0").style.display = "block";
+            document.getElementById("analysis1").style.display = "block";
+            document.getElementById("NewGame").innerHTML = "Reset board";
+        } else {
+            document.getElementById("play0").style.display = "block";
+            document.getElementById("play1").style.display = "block";
+            document.getElementById("analysis0").style.display = "none";
+            document.getElementById("analysis1").style.display = "none";
+            document.getElementById("NewGame").innerHTML = "New game";
+        }
+
+    }
+
+    function makeCustom() {
+
+        document.getElementById("custom").checked = true;
+
+    }
+
+</script>
+</div>
